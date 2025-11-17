@@ -226,6 +226,9 @@ for directory in directories_to_process:
 
                     # Replace 2410 with 2510
                     new_file_data = new_file_data.replace(f'2410', f'2510')
+                    new_file_data = new_file_data.replace(f'https://nussoc.github.io/2510/img', f'https://nussoc.github.io/img')
+                    new_file_data = new_file_data.replace(f'https://nussoc.github.io/2510/css/app.css', f'https://nussoc.github.io/css/app.css')
+                    new_file_data = new_file_data.replace(f'MMXXIV - I', f'MMXXV - I')
 
                 # Write the modified data back to the file
                 # Only write if changes were actually made
