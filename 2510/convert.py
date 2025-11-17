@@ -224,6 +224,9 @@ for directory in directories_to_process:
                     # class="game-object">2609423</span> -> class="game-object">Chia Loke En, Lu-Anne</span>
                     new_file_data = new_file_data.replace(f'class="game-object">{k}</span>', f'class="game-object">{v}</span>')
 
+                    # Replace 2410 with 2510
+                    new_file_data = new_file_data.replace(f'2410', f'2510')
+
                 # Write the modified data back to the file
                 # Only write if changes were actually made
                 if new_file_data != file_data:
