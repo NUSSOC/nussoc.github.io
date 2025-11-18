@@ -1,7 +1,13 @@
 import os
+import sys
+import re
 
-directories = ['.', 'games/qual_1', 'games/qual_2', 'games/qual_3', 'games/qual_4', 'games/qual_5', 'games/finals']
+# --- CONFIGURATION ---
+# This is the list of directories *relative to this script*.
+# This script assumes you are running it from the '2510' folder.
+directories_to_process = ['.', 'games/qual_1', 'games/qual_2', 'games/qual_3', 'games/qual_4', 'games/qual_5', 'games/finals']
 
+# This is the map you generated
 sub_to_name = {
     "2610514": "Aaron Tan Wei Heng",
     "2612074": "Adam Yap Wenbin",
@@ -158,29 +164,90 @@ sub_to_name = {
     "2605052": "Zachary Ong Ze En",
     "2613317": "Zheng Jia"
 }
+# --- END CONFIGURATION ---
 
-# Process each HTML file in the directory
-for directory in directories:
-    print(f"Files: {os.listdir(directory)}")
-    for filename in os.listdir(directory):
-        if filename.endswith('.html'):
-            filepath = os.path.join(directory, filename)
+# Sort keys by length, descending, to avoid partial matches
+# (e.g., "260" replacing part of "2609315")
+sorted_keys = sorted(sub_to_name.keys(), key=len, reverse=True)
+
+print("--- Replacing content in all HTML files ---")
+# This script will replace content in all files, but will not rename them.
+for directory in directories_to_process:
+    print(f"Processing directory: {directory}")
+    try:
+        # Check if the path is a valid directory
+        if not os.path.isdir(directory):
+            print(f"Skipping '{directory}' as it is not a directory.")
+            continue
             
-            # Read the HTML file
-            with open(filepath, 'r', encoding='utf-8') as file:
-                file_data = file.read()
+        for filename in os.listdir(directory):
+            if filename.endswith('.html'):
+                filepath = os.path.join(directory, filename)
+                
+                # Read the HTML file
+                try:
+                    with open(filepath, 'r', encoding='utf-8') as file:
+                        file_data = file.read()
+                except Exception as e:
+                    print(f"Error reading {filepath}: {e}")
+                    continue
+                
+                new_file_data = file_data
+                
+                # Replace each ID with its corresponding full name
+                # This is a much safer replacement logic based on the HTML
+                # you provided.
+                for k in sorted_keys: 
+                    v = sub_to_name[k]
+                    
+                    # Target 1: For index.html (winners)
+                    # <strong>2611634</strong> -> <strong>Feliciano...</strong>
+                    new_file_data = new_file_data.replace(f'<strong>{k}</strong>', f'<strong>{v}</strong>')
 
-            print(f"Opened: {filepath}")
-            # Replace each ID with its corresponding name
-            for k, v in sub_to_name.items():
-                k = int(k)
-                file_data = file_data.replace(f'{k}', f'{v}')
-                print(f"replaced '{k}' with '{v}'")
+                    # Target 2: For index.html (losers)
+                    # <li>2613113</li> -> <li>Devireddy...</li>
+                    new_file_data = new_file_data.replace(f'<li>{k}</li>', f'<li>{v}</li>')
 
-            # Write the modified data back to the file
-            with open(filepath, 'w', encoding='utf-8') as file:
-                file.write(file_data)
-            
-            print(f"Processed {filename}")
+                    # Target 3: For game-log.html (Overview table winners)
+                    # <th><i class="fa fa-trophy"></i> 2599858</th> -> <th><i class="fa fa-trophy"></i> Valmonte...</th>
+                    new_file_data = new_file_data.replace(f'<th><i class="fa fa-trophy"></i> {k}</th>', f'<th><i class="fa fa-trophy"></i> {v}</th>')
 
-    print(f"All HTML files have been processed for {directory}")
+                    # Target 4: For game-log.html (Overview table others)
+                    # <th>2611017</th> -> <th>Justin...</th>
+                    new_file_data = new_file_data.replace(f'<th>{k}</th>', f'<th>{v}</th>')
+
+                    # Target 5: For game-log.html (Scores sidebar)
+                    # <td>2609644</td> -> <td>Yap Thiam Lok Keith</td>
+                    new_file_data = new_file_data.replace(f'<td>{k}</td>', f'<td>{v}</td>')
+
+                    # Target 6: For game-log.html (Event log spans)
+                    # class="game-object">2609423</span> -> class="game-object">Chia Loke En, Lu-Anne</span>
+                    new_file_data = new_file_data.replace(f'class="game-object">{k}</span>', f'class="game-object">{v}</span>')
+
+                    # Replace 2410 with 2510
+                    new_file_data = new_file_data.replace(f'2410', f'2510')
+                    new_file_data = new_file_data.replace(f'https://nussoc.github.io/2510/img', f'https://nussoc.github.io/img')
+                    new_file_data = new_file_data.replace(f'https://nussoc.github.io/2510/css/app.css', f'https://nussoc.github.io/css/app.css')
+                    new_file_data = new_file_data.replace(f'MMXXIV - I', f'MMXXV - I')
+
+                # Write the modified data back to the file
+                # Only write if changes were actually made
+                if new_file_data != file_data:
+                    try:
+                        with open(filepath, 'w', encoding='utf-8') as file:
+                            file.write(new_file_data)
+                        print(f"  Updated content for: {filename}")
+                    except Exception as e:
+                        print(f"  Error writing {filepath}: {e}")
+                else:
+                    # This check is useful to see if the script is finding the files
+                    # but not finding any matching patterns.
+                    if filename != "index.html": # index.html links are expected to change
+                        print(f"  No display IDs found to replace in: {filename}")
+
+    except FileNotFoundError:
+        print(f"ERROR: Directory not found: '{directory}'. Skipping.")
+    except Exception as e:
+        print(f"An unexpected error occurred in {directory}: {e}")
+
+print("\n--- All files processed ---")
