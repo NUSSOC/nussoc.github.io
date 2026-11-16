@@ -1,0 +1,30 @@
+
+body { margin: 0; color: #333; background: white; font: 16px/1.5 Arial, sans-serif; }
+a { color: #337ab7; text-decoration: none; }
+a:hover { text-decoration: underline; }
+.container { max-width: 1170px; margin: auto; padding: 0 20px; }
+header { text-align: center; border-bottom: 1px solid #eee; margin-bottom: 24px; }
+h1 { font-size: 32px; font-weight: 500; }
+h2 { text-align: center; font-weight: 500; }
+h3 { font-weight: 500; }
+.logo { width: 160px; }
+.games { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.game { text-align: center; margin-bottom: 0; }
+.game ul { padding: 0; list-style: none; }
+.text-success { color: #3c763d; }
+.table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+.table th, .table td { padding: 8px; border-top: 1px solid #ddd; text-align: left; }
+.table .success { background: #dff0d8; }
+.table-scroll { overflow-x: auto; }
+details { margin: 20px 0; border: 1px solid #ddd; border-radius: 6px; padding: 12px; }
+summary { cursor: pointer; font-size: 20px; color: #337ab7; }
+.simulation { display: grid; grid-template-columns: 1fr 3fr; gap: 24px; }
+.simulation > * { min-width: 0; }
+.event-list { padding-left: 22px; font-size: 14px; }
+.event-list li { break-inside: avoid; margin-bottom: 5px; overflow-wrap: anywhere; }
+nav a { display: inline-block; margin-right: 12px; }
+footer { margin-top: 30px; text-align: center; border-top: 1px solid #eee; }
+@media (max-width: 767px) {
+  .games, .simulation { grid-template-columns: 1fr; }
+  h1 { font-size: 26px; }
+}
